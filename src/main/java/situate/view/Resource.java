@@ -30,12 +30,13 @@ public class Resource {
     private List<String> permissions; // e.g. OWNER_READ, GROUP_EXECUTE, OTHERS_WRITE
     private boolean deploy;
     private boolean create;
+    private boolean compile;
 
     public Resource() {
-        this(null, null, null, null, null, null, false, false);
+        this(null, null, null, null, null, null, false, false, false);
     }
 
-    public Resource(String url, String path, String type, String user, String group, List<String> permissions, boolean deploy, boolean create) {
+    public Resource(String url, String path, String type, String user, String group, List<String> permissions, boolean deploy, boolean create, boolean compile) {
         this.url = url;
         this.path = path;
         this.type = type;
@@ -44,6 +45,7 @@ public class Resource {
         this.permissions = permissions;
         this.deploy = deploy;
         this.create = create;
+        this.compile = compile;
     }
 
     public String getUrl() {
@@ -118,4 +120,11 @@ public class Resource {
         this.create = create;
     }
 
+    public boolean isCompile() {
+        return compile;
+    }
+
+    public void setCompile(boolean compile) {
+        this.compile = compile;
+    }
 }

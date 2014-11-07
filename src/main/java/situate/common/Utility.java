@@ -76,6 +76,13 @@ public class Utility {
         return new Command(command.getService(), start, stop, pidFile.getAbsolutePath(), pid);
     }
 
+    public static InputStream compile(Deployment deployment, InputStream input) throws IOException {
+        ExpressionParser parser = new SpelExpressionParser();
+        StandardEvaluationContext context = context(deployment);
+
+        return IOUtils.toInputStream(parse(parser, input, context));
+    }
+
     public static situate.view.Resource resource(situate.view.Resource resource, StandardEvaluationContext context) {
         ExpressionParser parser = new SpelExpressionParser();
         String url = parse(parser, resource.getUrl(), context);
@@ -86,8 +93,9 @@ public class Utility {
         List<String> permissions = resource.getPermissions();
         boolean deploy  = resource.isDeploy();
         boolean create = resource.isCreate();
+        boolean compile = resource.isCompile();
 
-        return new situate.view.Resource(url, path, type, user, group, permissions, deploy, create);
+        return new situate.view.Resource(url, path, type, user, group, permissions, deploy, create, compile);
     }
 
     public static Deployment deployment(String url) throws IOException {
@@ -101,11 +109,11 @@ public class Utility {
         }
     }
 
-    public static Deployment deployment(Deployment base, Template template) throws IOException {
+    public static StandardEvaluationContext context(Deployment deployment) throws IOException {
         Map<String, String> map = new HashMap<>();
 
-        if (StringUtils.isNotEmpty(base.getPropertiesUrl())) {
-            Resource propertiesResource = new UrlResource(base.getPropertiesUrl());
+        if (StringUtils.isNotEmpty(deployment.getPropertiesUrl())) {
+            Resource propertiesResource = new UrlResource(deployment.getPropertiesUrl());
 
             if (propertiesResource.exists()) {
                 InputStream input = propertiesResource.getInputStream();
@@ -123,10 +131,18 @@ public class Utility {
             }
         }
 
-        if (base.getProperties() != null)
-            map.putAll(base.getProperties());
+        if (deployment.getProperties() != null)
+            map.putAll(deployment.getProperties());
 
-        map.put("name", base.getName());
+        map.put("name", deployment.getName());
+
+        StandardEvaluationContext context = new StandardEvaluationContext(map);
+        context.addPropertyAccessor(new MapAccessor());
+        return context;
+    }
+
+    public static Deployment deployment(Deployment base, Template template) throws IOException {
+        StandardEvaluationContext context = context(base);
 
         Deployment deployment = new Deployment();
         deployment.setName(base.getName());
@@ -139,9 +155,6 @@ public class Utility {
         List<situate.view.Resource> resources = new ArrayList<situate.view.Resource>();
         if (base.getResources() != null && !base.getResources().isEmpty())
             resources.addAll(base.getResources());
-
-        StandardEvaluationContext context = new StandardEvaluationContext(map);
-        context.addPropertyAccessor(new MapAccessor());
 
         if (template.getCommands() != null) {
             for (Command command : template.getCommands()) {
@@ -175,6 +188,16 @@ public class Utility {
             return null;
 
         return parser.parseExpression(expression, new TemplateParserContext("${", "}")).getValue(context, String.class);
+    }
+
+    public static String parse(ExpressionParser parser, InputStream input, StandardEvaluationContext context) throws IOException {
+        if (input == null)
+            return null;
+        try {
+            return parser.parseExpression(IOUtils.toString(input), new TemplateParserContext("${", "}")).getValue(context, String.class);
+        } finally {
+            IOUtils.closeQuietly(input);
+        }
     }
 
     public static void setAccess(File file, String user, String group, Set<PosixFilePermission> filePermissions) throws IOException {

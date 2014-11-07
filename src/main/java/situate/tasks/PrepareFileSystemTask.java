@@ -24,6 +24,7 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import situate.view.Resource;
+import situate.view.Template;
 
 import java.io.*;
 import java.util.List;
@@ -59,6 +60,10 @@ public class PrepareFileSystemTask implements Tasklet {
                 UrlResource external = new UrlResource(resource.getUrl());
                 InputStream input = external.getInputStream();
                 OutputStream output = new FileOutputStream(resource.getPath());
+
+                if (resource.isCompile()) {
+                    input = Utility.compile(deployment, input);
+                }
 
                 try {
                     IOUtils.copy(input, output);
