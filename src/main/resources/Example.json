@@ -1,0 +1,10 @@
+{
+    "name" : "example",
+    "templateUrl" : "file:/src/main/resources/ExampleTemplate.json",
+    "properties" : {
+        "runUser" : "example",
+        "runGroup" : "example",
+        "deployUser" : "situate",
+        "deployGroup" : "deployment"
+    }
+}

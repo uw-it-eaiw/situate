@@ -1,0 +1,43 @@
+{
+    "id" : "spring-boot-deployment",
+    "resources" : [
+        {
+            "url": "https://buildserver.example.org/jars/${name}.jar",
+            "label": "jar file",
+            "type": "file",
+            "path": "/var/lib/${name}",
+            "user": "${deployUser}",
+            "group": "${deployGroup}",
+            "permissions": [ "OWNER_READ", "GROUP_READ", "OTHERS_READ" ],
+            "deploy": true
+        },
+        {
+            "label": "config directory",
+            "type": "directory",
+            "path": "/etc/${name}",
+            "user": "${runUser}",
+            "group": "${runGroup}",
+            "permissions": [ "OWNER_EXECUTE", "OWNER_READ", "GROUP_EXECUTE", "GROUP_READ", "GROUP_WRITE" ],
+            "create": true
+        },
+        {
+            "label": "log directory",
+            "type": "directory",
+            "path": "/var/log/${name}",
+            "user": "${runUser}",
+            "group": "${runGroup}",
+            "permissions": [ "OWNER_EXECUTE", "OWNER_READ", "OWNER_WRITE", "GROUP_EXECUTE", "GROUP_READ" ],
+            "create": true
+        },
+        {
+            "label": "run directory",
+            "type": "directory",
+            "path": "/var/run/${name}",
+            "user": "${runUser}",
+            "group": "${runGroup}",
+            "permissions": [ "OWNER_EXECUTE", "OWNER_READ", "OWNER_WRITE", "GROUP_EXECUTE", "GROUP_READ" ],
+            "create": true
+        }
+    ]
+}
+
