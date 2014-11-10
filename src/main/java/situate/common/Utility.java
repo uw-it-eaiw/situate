@@ -15,6 +15,7 @@
 package situate.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.deploy.resources.Deployment_es;
 import org.apache.commons.io.IOUtils;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.common.TemplateParserContext;
@@ -51,7 +52,7 @@ public class Utility {
 
     private static final Logger LOGGER = Logger.getLogger(Utility.class);
 
-    public static situate.view.Command command(situate.view.Command command, StandardEvaluationContext context) throws IOException {
+    public static situate.view.Command command(Deployment deployment, situate.view.Command command) throws IOException {
         ExpressionParser parser = new SpelExpressionParser();
 
         File pidFile = new File(command.getPidFile());
@@ -65,10 +66,7 @@ public class Utility {
             }
         }
 
-        if (StringUtils.isNotEmpty(pid))
-            context.setVariable("pid", pid);
-        else
-            context.setVariable("pid", "");
+        StandardEvaluationContext context = context(deployment, pid);
 
         String start = parse(parser, command.getStart(), context);
         String stop = parse(parser, command.getStop(), context);
@@ -78,7 +76,7 @@ public class Utility {
 
     public static InputStream compile(Deployment deployment, InputStream input) throws IOException {
         ExpressionParser parser = new SpelExpressionParser();
-        StandardEvaluationContext context = context(deployment);
+        StandardEvaluationContext context = context(deployment, "");
 
         return IOUtils.toInputStream(parse(parser, input, context));
     }
@@ -109,7 +107,7 @@ public class Utility {
         }
     }
 
-    public static StandardEvaluationContext context(Deployment deployment) throws IOException {
+    public static StandardEvaluationContext context(Deployment deployment, String pid) throws IOException {
         Map<String, String> map = new HashMap<>();
 
         if (StringUtils.isNotEmpty(deployment.getPropertiesUrl())) {
@@ -135,6 +133,7 @@ public class Utility {
             map.putAll(deployment.getProperties());
 
         map.put("name", deployment.getName());
+        map.put("pid", pid);
 
         StandardEvaluationContext context = new StandardEvaluationContext(map);
         context.addPropertyAccessor(new MapAccessor());
@@ -142,7 +141,7 @@ public class Utility {
     }
 
     public static Deployment deployment(Deployment base, Template template) throws IOException {
-        StandardEvaluationContext context = context(base);
+        StandardEvaluationContext context = context(base, "");
 
         Deployment deployment = new Deployment();
         deployment.setName(base.getName());
@@ -158,7 +157,7 @@ public class Utility {
 
         if (template.getCommands() != null) {
             for (Command command : template.getCommands()) {
-                commands.add(Utility.command(command, context));
+                commands.add(Utility.command(deployment, command));
             }
         }
 
