@@ -20,7 +20,7 @@ public class UtilityTest {
     @Test
     public void verifyTemplateCompile() throws IOException {
         List<String> permissions = Lists.newArrayList(Permission.OWNER_EXECUTE.name(), Permission.OWNER_READ.name());
-        Resource resource = new Resource("", "/some/directory/${name}", "file", "${deployUser}", "${deployGroup}", permissions, false, false, compile);
+        Resource resource = new Resource("", "/some/directory/${name}", "file", "${deployUser}", "${deployGroup}", permissions, false, false, false);
         Template template = new Template();
         template.setResources(Collections.singletonList(resource));
 
@@ -47,7 +47,7 @@ public class UtilityTest {
         properties.put("deployUser", "situate");
         properties.put("deployGroup", "deployment");
 
-        Resource specificResource = new Resource("", "/some/test/path", "file", "testuser", "testgroup", permissions, false, false, compile);
+        Resource specificResource = new Resource("", "/some/test/path", "file", "testuser", "testgroup", permissions, false, false, false);
 
         Deployment base = new Deployment("example", null, properties, Collections.singletonList(specificResource));
         Deployment deployment = Utility.deployment(base, template);
