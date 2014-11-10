@@ -15,7 +15,6 @@
 package situate.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.deploy.resources.Deployment_es;
 import org.apache.commons.io.IOUtils;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.common.TemplateParserContext;
